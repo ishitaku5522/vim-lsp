@@ -606,9 +606,16 @@ endfunction
 "   server - string
 "   comand_or_code_action - Command | CodeAction
 function! s:execute_command_or_code_action(server, command_or_code_action) abort
+    let g:debug = a:command_or_code_action
     if has_key(a:command_or_code_action, 'command') && type(a:command_or_code_action['command']) == type('')
-        let l:command = a:command_or_code_action
-        call s:execute_command(a:server, l:command)
+        if a:command_or_code_action['command'] == 'java.apply.workspaceEdit'
+          for arg in a:command_or_code_action['arguments']
+            call lsp#utils#workspace_edit#apply_workspace_edit(arg)
+          endfor
+        else
+          let l:command = a:command_or_code_action
+          call s:execute_command(a:server, l:command)
+        endif
     else
         let l:code_action = a:command_or_code_action
         if has_key(l:code_action, 'edit')
