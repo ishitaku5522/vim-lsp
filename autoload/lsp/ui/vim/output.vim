@@ -87,6 +87,7 @@ function! s:get_float_positioning(height, width) abort
       endif
     endif
     let l:col = col('.')
+    let l:style = 'minimal'
     " Positioning is not window but screen relative
     let l:opts = {
           \ 'relative': 'win',
@@ -94,6 +95,7 @@ function! s:get_float_positioning(height, width) abort
           \ 'col': l:col,
           \ 'width': l:width,
           \ 'height': l:height,
+          \ 'style': l:style,
           \ }
     return l:opts
 endfunction
@@ -290,6 +292,7 @@ function! lsp#ui#vim#output#preview(server, data, options) abort
        \ && type(g:lsp_preview_doubletap) == 3
        \ && len(g:lsp_preview_doubletap) >= 1
        \ && type(g:lsp_preview_doubletap[0]) == 2
+       \ && mode()[0] !=# 'i'
         echo ''
         return call(g:lsp_preview_doubletap[0], [])
     endif

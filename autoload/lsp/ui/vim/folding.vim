@@ -25,13 +25,13 @@ function! s:set_textprops(buf) abort
 
     " Skip if the buffer doesn't exist. This might happen when a buffer is
     " opened and quickly deleted.
-    if !bufexists(a:buf) | return | endif
+    if !bufloaded(a:buf) | return | endif
 
     " Create text property, if not already defined
     silent! call prop_type_add(s:textprop_name, {'bufnr': a:buf})
 
     " First, clear all markers from the previous run
-    call prop_remove({'type': s:textprop_name, 'bufnr': a:buf})
+    call prop_remove({'type': s:textprop_name, 'bufnr': a:buf}, 1, line('$'))
 
     " Add markers to each line
     let l:i = 1
@@ -181,7 +181,10 @@ function! s:handle_fold_request(server, data) abort
     " Set 'foldmethod' back to 'expr', which forces a re-evaluation of
     " 'foldexpr'. Only do this if the user hasn't changed 'foldmethod',
     " and this is the correct buffer.
-    let l:current_window = winnr()
-    windo if &l:foldmethod ==# 'expr' && bufnr('%') == l:bufnr | let &l:foldmethod = 'expr' | endif
-    execute l:current_window . 'wincmd w'
+    for l:winid in win_findbuf(l:bufnr)
+        if getwinvar(l:winid, '&foldmethod') ==# 'expr'
+            call setwinvar(l:winid, '&foldmethod', 'expr')
+        endif
+    endfor
 endfunction
+
