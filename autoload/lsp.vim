@@ -387,7 +387,8 @@ function! lsp#default_get_supported_capabilities(server_info) abort
     \   'textDocument': {
     \       'completion': {
     \           'completionItem': {
-    \              'documentationFormat': ['plaintext']
+    \              'documentationFormat': ['plaintext'],
+    \              'snippetSupport': v:false
     \           },
     \           'completionItemKind': {
     \              'valueSet': lsp#omni#get_completion_item_kinds()
@@ -785,11 +786,12 @@ function! s:get_versioned_text_document_identifier(buf, buffer_info) abort
 endfunction
 
 function! lsp#send_request(server_name, request) abort
+    let l:bufnr = get(a:request, 'bufnr', bufnr('%'))
     let l:Cb = has_key(a:request, 'on_notification') ? a:request['on_notification'] : function('s:Noop')
     let l:request = copy(a:request)
     let l:request['on_notification'] = {id, data, event->l:Cb(data)}
     call lsp#utils#step#start([
-        \ {s->s:ensure_flush(bufnr('%'), a:server_name, s.callback)},
+        \ {s->s:ensure_flush(l:bufnr, a:server_name, s.callback)},
         \ {s->s:is_step_error(s) ? l:Cb(s.result[0]) : s:send_request(a:server_name, l:request) },
         \ ])
 endfunction
